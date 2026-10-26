@@ -19,12 +19,16 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 4px}input,selec
 <main>
 <section id="est" class="sec on"><div class="card"><h3>Fare estimate</h3>
 <label>Pickup</label><input id="ePick" placeholder="Street address, Falmouth">
-<label>Drop-off</label><input id="eDrop" placeholder="Street address, Falmouth">
+<button class="btn alt" style="margin-top:6px;padding:10px;font-size:15px" onclick="gpsPick()">📍 Use my location for pickup</button>
+<div class="small" id="pickInfo"></div>
+<label>Where are you going?</label><input id="eDrop" placeholder="Street address or place, e.g. Falmouth Hospital">
+<div class="row"><button class="btn alt" style="margin-top:6px;padding:10px;font-size:15px" onclick="findDrop()">🔎 Find address</button><button class="btn alt" style="margin-top:6px;padding:10px;font-size:15px" onclick="gpsDrop()">📍 I'm at drop-off</button></div>
+<div class="small" id="dropInfo">Or paste coordinates like 41.5515, -70.6148</div>
 <label>Common local stops (sample, approx. miles from Falmouth center)</label>
 <div class="chips" id="presets"></div>
-<label>Approx. miles</label><input id="eMiles" type="number" min="0" step="0.1" value="2">
+<label>Miles <span class="small" id="milesSrc">(manual)</span></label><input id="eMiles" type="number" min="0" step="0.1" value="2">
 <div style="margin-top:14px" class="fare" id="eFare"></div>
-<p class="small">Estimate — metered at the Town-approved tariff ($3.00 flag + $3.75 per mile). Final fare is by the meter. Sample service area: Falmouth / East Falmouth only.</p>
+<p class="small">Estimate — metered at the Town-approved tariff ($3.00 flag + $3.75 per mile). Final fare is by the meter. GPS miles are straight-line ×1.25 road allowance and can still be under real road miles (same caveat as the taxi meter). Location lookups use free OpenStreetMap; nothing is stored on a server. Sample service area: Falmouth / East Falmouth only.</p>
 <button class="btn" onclick="go('now',1)">Book this ride</button></div></section>
 
 <section id="now" class="sec"><div class="card"><h3>Book now</h3><div id="fNow"></div><button class="btn" onclick="book('now')">Request ride (demo)</button></div></section>
@@ -44,8 +48,23 @@ const P=[["Walmart (Falmouth)",2.5],["Falmouth Hospital",1.5],["Falmouth Bus Dep
 const fare=m=>FLAG+PER*Math.max(0,+m||0);
 function upd(){$('eFare').textContent='$'+fare($('eMiles').value).toFixed(2)+' est.'}
 $('presets').innerHTML=P.map((p,i)=>`<button onclick="pre(${i})">${p[0]}</button>`).join('');
-function pre(i){$('eDrop').value=P[i][0];$('eMiles').value=P[i][1];upd()}
-$('eMiles').oninput=upd;upd();
+function pre(i){$('eDrop').value=P[i][0];dropLL=null;$('eMiles').value=P[i][1];$('milesSrc').textContent='(preset, rough)';$('dropInfo').textContent='';upd()}
+let pickLL=null,dropLL=null;const ROAD=1.25;
+function hav(a,b){const R=3958.8,r=x=>x*Math.PI/180,dl=r(b[0]-a[0]),dn=r(b[1]-a[1]);const h=Math.sin(dl/2)**2+Math.cos(r(a[0]))*Math.cos(r(b[0]))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
+function calc(){if(pickLL&&dropLL){const st=hav(pickLL,dropLL);$('eMiles').value=(st*ROAD).toFixed(1);$('milesSrc').textContent=`(auto from GPS: ${st.toFixed(1)} mi straight-line ×${ROAD})`;upd()}}
+const ll=p=>p[0].toFixed(5)+', '+p[1].toFixed(5);
+async function rev(p){try{const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${p[0]}&lon=${p[1]}&zoom=18`);const j=await r.json();return j.display_name?j.display_name.split(',').slice(0,3).join(','):null}catch(e){return null}}
+function geo(cb){if(!navigator.geolocation)return toast('Location not available — type the address instead');toast('Getting your location…');
+ navigator.geolocation.getCurrentPosition(p=>cb([p.coords.latitude,p.coords.longitude],p.coords.accuracy),e=>toast('Location denied/unavailable — type the address instead'),{enableHighAccuracy:true,timeout:15000})}
+function gpsPick(){geo(async(p,acc)=>{pickLL=p;$('ePick').value=ll(p);$('pickInfo').textContent=`GPS ${ll(p)} (±${Math.round(acc)} m)`;const n=await rev(p);if(n){$('ePick').value=n;$('pickInfo').textContent+=' · '+n}calc()})}
+function gpsDrop(){geo(async(p,acc)=>{dropLL=p;$('eDrop').value=ll(p);$('dropInfo').textContent=`GPS ${ll(p)} (±${Math.round(acc)} m)`;const n=await rev(p);if(n){$('eDrop').value=n}calc()})}
+async function findDrop(){const q=$('eDrop').value.trim();if(!q)return toast('Type where you are going');
+ const m=q.match(/^\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*$/);if(m){dropLL=[+m[1],+m[2]];$('dropInfo').textContent='Coordinates '+ll(dropLL);return calc()}
+ try{const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=us&viewbox=-70.75,41.65,-70.45,41.50&q='+encodeURIComponent(q));const j=await r.json();
+ if(!j.length)return toast('Address not found — enter miles manually');dropLL=[+j[0].lat,+j[0].lon];$('dropInfo').textContent='Found: '+j[0].display_name.split(',').slice(0,3).join(',');
+ if(!pickLL)toast('Now tap “Use my location” for pickup to auto-calc miles');calc()}catch(e){toast('Lookup failed — enter miles manually')}}
+$('eDrop').addEventListener('input',()=>{dropLL=null});$('ePick').addEventListener('input',()=>{pickLL=null;$('pickInfo').textContent=''});
+$('eMiles').oninput=()=>{$('milesSrc').textContent='(manual)';upd()};upd();
 const prefs=JSON.parse(localStorage.citPrefs||'{"sms":true,"pay":"Cash"}');$('pSms').checked=prefs.sms;$('pPay').value=prefs.pay;
 function savePrefs(){prefs.sms=$('pSms').checked;prefs.pay=$('pPay').value;localStorage.citPrefs=JSON.stringify(prefs);toast('Preferences saved (this browser only)')}
 const fields=k=>`<label>Name</label><input id="${k}Name"><label>Phone</label><input id="${k}Phone" type="tel" placeholder="(508) 555-0123">
