@@ -93,7 +93,7 @@ input[type=datetime-local],input[type=text],input[type=tel]{padding:11px;margin-
 label.ck{margin-top:8px}
 .wk{margin-top:8px;border:1px solid #fcd34d;background:#fffbeb;border-radius:14px;padding:10px 12px}
 .wkh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.tag{background:var(--ac);color:#1f1300;border-radius:99px;padding:3px 9px;font-size:11.5px;font-weight:800}
-</style></head><body><div class="app">
+.estc{display:flex;align-items:center;gap:10px;margin:0 0 8px}.estb{background:var(--tx)!important;color:#fff!important}.estv{font-size:22px;font-weight:800;color:var(--tx)}.estv small{font-size:11px;color:var(--mu);font-weight:500}</style></head><body><div class="app">
 <header><div class="logo">Cape Island <b>Taxi</b></div><div class="hd"><button class="pts" id="infoBtn" onclick="showInfo()" aria-label="Taxi info and FAQ">ⓘ Info</button><button class="pts" id="ptsBtn" aria-label="Loyalty points">★ <span id="pts">0</span> pts</button></div></header>
 <div class="mapwrap"><div id="map" aria-label="Map"></div><div id="lock" class="lock hide">🔒 Live driver map unlocks when your driver is ~5 minutes away</div></div>
 <main class="sheet">
@@ -115,6 +115,7 @@ label.ck{margin-top:8px}
 <p class="note">Falmouth, East Falmouth &amp; Woods Hole. Up to 3 stops — the meter runs straight through.</p>
 <h3>Choose a ride</h3>
 <div class="ride on" id="rStd" onclick="pickRide('std')" role="button" tabindex="0"><div class="av">🚕</div><div><b>Standard Taxi</b><small>Up to 4 riders · 2-car local fleet</small></div><div class="p"><span class="met">Metered</span><small>town meter</small></div></div>
+<div class="estc"><button class="sm estb" onclick="getEst()">🧮 Get estimate</button><span id="estOut" class="estv"></span></div>
 <div class="ride" id="rWav" onclick="pickRide('wav')" role="button" tabindex="0"><div class="av">♿</div><div><b>Accessible request</b><small>Adds a wheelchair note for dispatch</small></div><div class="p"><small>request note</small></div></div>
 <h3>Rider discount eligibility</h3>
 <div class="chips" id="disc">
@@ -132,7 +133,7 @@ label.ck{margin-top:8px}
 <p class="note">Tap a question:</p>
 <div class="chips" id="qa"></div><div id="ans" class="ans hide" role="status"></div>
 <h3>Fares — Town of Falmouth tariff</h3>
-<details class="faq" open><summary>Meter rates</summary><div>Approved by the Falmouth Select Board (Jan 9, 2023):<br>• Flag / minimum: <b>$3.00</b><br>• <b>$0.75 per 1/5 mile</b> ($3.75/mile)<br>• Time in transit: <b>$0.45/min</b>, in addition to mileage<br>• Waiting: <b>$26/hr</b> after 3 free minutes at pickup<br>• Trunk items: <b>$0.50 each</b> (hand bags free)<br>The on-screen estimate uses distance only ($3.00 + $3.75/mile); your final fare is by the meter.</div></details>
+<details class="faq" open><summary>How fares work</summary><div>All rides use the Town of Falmouth metered tariff approved by the Select Board. Tap <b>Get estimate</b> on the booking screen for a quick price — your final fare is by the meter (time, waiting and trunk items can add to it).</div></details>
 <details class="faq"><summary>Senior & disability discount</summary><div>The Town tariff provides a <b>25% discount</b> for holders of a Council on Aging senior card, MassRehab card, or MCB card. Present your card to the driver for the Town 25% discount; estimate shown is the full meter rate.</div></details>
 <details class="faq"><summary>Out of town</summary><div>Trips leaving Falmouth are on the regular meter. No flat rates are permitted.</div></details>
 <h3>Service</h3>
@@ -172,7 +173,8 @@ function drawMap(){[mP,mD,line,...mS].forEach(m=>m&&map.removeLayer(m));mP=mD=li
  else if(S.pc||S.dc)map.setView(S.pc||S.dc,14)}
 const money=n=>'$'+n.toFixed(2);
 function est(){const m=parseFloat($('mi').value)||0;return 3+3.75*m} // tariff only — never altered by flags/points
-function calc(){} // fare shown on meter; est() kept internal for points
+function calc(){$('estOut').textContent=''}
+function getEst(){const m=parseFloat($('mi').value)||0;if(!m)return toast('Add pickup & destination first');$('estOut').innerHTML=money(est())+' <small>est. · final by meter</small>'}
 function hav(a,b){const R=3958.8,r=x=>x*Math.PI/180,dl=r(b[0]-a[0]),dn=r(b[1]-a[1]),h=Math.sin(dl/2)**2+Math.cos(r(a[0]))*Math.cos(r(b[0]))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
 function route(){return [S.pc,...S.stops.filter(x=>x.c).map(x=>x.c),S.dc]}
 function auto(){drawMap();if(S.pc&&S.dc){const r=route();let d=0;for(let i=1;i<r.length;i++)d+=hav(r[i-1],r[i])*1.25;$('mi').value=d.toFixed(1);calc()}}
@@ -224,7 +226,7 @@ function render(){const st=S.step,li=$('steps').children;[...li].forEach((l,i)=>
 function adv(){if(S.step>=4)return;S.step++;if(S.step==4){const n=Math.round(T.est);localStorage.cit_points=P()+n;showPts();toast(`Trip complete — +${n} points (demo)`)}render()}
 let infoFrom='vBook';function showInfo(){if(!$('vInfo').classList.contains('hide'))return;infoFrom=$('vTrip').classList.contains('hide')?'vBook':'vTrip';$('infoBack').textContent=infoFrom=='vTrip'?'← Back to my trip':'Book a ride';['vBook','vTrip'].forEach(v=>$(v).classList.add('hide'));$('vInfo').classList.remove('hide');window.scrollTo(0,0)}
 function hideInfo(){$('vInfo').classList.add('hide');$(infoFrom).classList.remove('hide');window.scrollTo(0,0)}
-const QA=[['How is the fare calculated?','Town meter: $3.00 flag, then $0.75 per 1/5 mile ($3.75/mile), plus $0.45/min time in transit, waiting $26/hr after 3 free minutes, trunk items $0.50 each. Our estimate uses distance only — final fare by meter.'],
+const QA=[['How is the fare calculated?','Fares follow the Town of Falmouth metered tariff. Tap Get estimate on the booking screen for a quick price; the final fare is by the meter.'],
 ['Can I add a stop?','Yes — tap “＋ Add stop” for up to 3 stops. The meter keeps running through each stop; no separate stop fee.'],
 ['Senior or disability discount?','Council on Aging senior card, MassRehab, or MCB card holders get the Town 25% discount. Present your card to the driver; the estimate shown is the full meter rate.'],
 ['When does the map show?','The live driver map unlocks about 5 minutes before pickup.'],
