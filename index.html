@@ -71,8 +71,29 @@ input[type=datetime-local],input[type=text],input[type=tel],input[type=number]{b
 .eta{background:var(--sky);color:#075985}
 .num{border-color:var(--ac2);color:#14213d}
 a{color:var(--ac2)}
+
+/* v3: compact + Woods Hole wash */
+body{background:#f6f4ef}
+body:before{content:"";position:fixed;inset:0;background:url(assets/woods-hole-light.jpg) center 30%/cover no-repeat;opacity:.45;z-index:-1}
+.app{background:rgba(255,253,248,.35)}
+header{padding:8px 14px;background:rgba(255,250,240,.82);backdrop-filter:blur(8px);border-bottom:1px solid rgba(230,225,214,.7)}
+.logo{font-size:17px}.pts{padding:6px 11px;font-size:13px}
+#map{height:32vh;min-height:210px}
+.sheet{background:rgba(255,255,255,.94);backdrop-filter:blur(10px);padding:10px 14px 22px;margin-top:-14px;border-radius:18px 18px 0 0}
+.grab{margin-bottom:6px;width:36px}
+h2{font-size:21px;margin:2px 0 6px}h3{margin:12px 0 6px;font-size:11px}
+.ferry{display:inline-block;background:var(--sky);color:#075985;font-size:12.5px;font-weight:600;border-radius:99px;padding:6px 11px;margin-bottom:8px}
+.field{min-height:46px;margin-bottom:6px;border-radius:12px}.field input{padding:8px 0;font-size:16px}
+.note{margin:6px 0;font-size:12px}
+.ride{padding:9px 12px;margin-bottom:6px}.ride .p{font-size:15px}.met{color:var(--ac2);font-weight:800}
+.btn{margin-top:10px;min-height:50px;padding:13px}
+.seg button{padding:9px 6px}
+.chips{gap:6px}.chip{padding:8px 12px}
+input[type=datetime-local],input[type=text],input[type=tel]{padding:11px;margin-bottom:6px}
+label.ck{margin-top:8px}
+.wk{margin-top:8px;border:1px solid #fcd34d;background:#fffbeb;border-radius:14px;padding:10px 12px}
+.wkh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.tag{background:var(--ac);color:#1f1300;border-radius:99px;padding:3px 9px;font-size:11.5px;font-weight:800}
 </style></head><body><div class="app">
-<div class="demo" role="note">SAMPLE / DEMO ONLY — not a live booking service</div>
 <header><div class="logo">Cape Island <b>Taxi</b></div><div class="hd"><button class="pts" id="infoBtn" onclick="showInfo()" aria-label="Taxi info and FAQ">ⓘ Info</button><button class="pts" id="ptsBtn" aria-label="Loyalty points">★ <span id="pts">0</span> pts</button></div></header>
 <div class="mapwrap"><div id="map" aria-label="Map"></div><div id="lock" class="lock hide">🔒 Live driver map unlocks when your driver is ~5 minutes away</div></div>
 <main class="sheet">
@@ -80,41 +101,35 @@ a{color:var(--ac2)}
 <!-- BOOK -->
 <section id="vBook">
 <h2>Where to?</h2>
-<div class="seg" role="tablist"><button id="mNow" class="on" onclick="setMode('now')">Ride now</button><button id="mLater" onclick="setMode('later')">Reserve</button></div>
-<div id="laterBox" class="hide" style="margin-top:10px"><label class="note" for="when">Pickup date & time</label><input type="datetime-local" id="when"></div>
+<div class="ferry">⛴️ Woods Hole ferry drop-off &amp; pickup for Martha’s Vineyard</div>
+<div class="seg" role="tablist"><button id="mNow" class="on" onclick="setMode('now')">Ride now</button><button id="mLater" onclick="setMode('later')">Reserve</button><button id="mWeek" onclick="setMode('week')">Weekly</button></div>
+<div id="weekBox" class="hide wk"><div class="wkh"><b>Weekly work rides</b><span class="tag">Prepaid only · 10% off</span></div><div class="chips" id="wkN"><button class="chip" data-n="3">3 rides</button><button class="chip on" data-n="5">5 rides</button><button class="chip" data-n="10">10 rides</button></div><label class="note" for="wkStart">Week starting &amp; daily pickup time</label><input type="datetime-local" id="wkStart"><p class="note">Same pickup → destination each ride. Company prepaid weekly plan: 10% off metered fares <b>only when the pack is prepaid</b>. Pay-per-ride (cash or card later) is billed on the regular meter.</p><button class="sm" id="wkPay" onclick="wkPrepay()">💳 Prepay weekly pack (demo)</button> <span id="wkTag" class="note"></span></div>
+<div id="laterBox" class="hide" style="margin-top:8px"><label class="note" for="when">Pickup date & time</label><input type="datetime-local" id="when"></div>
 <div class="chain" style="margin-top:12px">
 <div class="field"><span class="dot"></span><input id="pick" aria-label="Pickup address" placeholder="Pickup (Falmouth / East Falmouth)"><button class="sm" onclick="gpsPick()">📍 My location</button></div>
 <div id="stops"></div>
 <button class="sm" id="addStop" onclick="addStop()" style="margin-bottom:8px">＋ Add stop</button>
 <div class="field"><span class="dot sq"></span><input id="drop" aria-label="Destination" placeholder="Destination"><button class="sm" onclick="findDrop()">Find</button><button class="sm" onclick="gpsDrop()" title="Use GPS as drop">📍</button></div>
-</div><div><div class="field"><span style="color:var(--mu);font-size:13px">Miles</span><input id="mi" type="number" step="0.1" min="0" aria-label="Trip miles" placeholder="auto from map, or type" oninput="calc()"></div>
+</div><div><div class="field"><span style="color:var(--mu);font-size:13px">Distance mi</span><input id="mi" type="number" step="0.1" min="0" aria-label="Trip miles" placeholder="auto from map" oninput="calc()"></div>
 </div>
-<p class="note">Service area: Falmouth & East Falmouth. Miles auto = straight line × 1.25 per leg (pickup → stops → destination). Extra stops: no flat stop fee — the meter keeps running through each stop.</p>
+<p class="note">Falmouth, East Falmouth &amp; Woods Hole. Up to 3 stops — the meter runs straight through.</p>
 <h3>Choose a ride</h3>
-<div class="ride on" id="rStd" onclick="pickRide('std')" role="button" tabindex="0"><div class="av">🚕</div><div><b>Standard Taxi</b><small>Up to 4 riders · 2-car local fleet</small></div><div class="p"><span id="fare">$3.00</span><small>estimate</small></div></div>
+<div class="ride on" id="rStd" onclick="pickRide('std')" role="button" tabindex="0"><div class="av">🚕</div><div><b>Standard Taxi</b><small>Up to 4 riders · 2-car local fleet</small></div><div class="p"><span class="met">Metered</span><small>town meter</small></div></div>
 <div class="ride" id="rWav" onclick="pickRide('wav')" role="button" tabindex="0"><div class="av">♿</div><div><b>Accessible request</b><small>Adds a wheelchair note for dispatch</small></div><div class="p"><small>request note</small></div></div>
-<p class="note">$3.00 flag + $3.75/mile. Estimate only — final fare by the meter.</p>
 <h3>Rider discount eligibility</h3>
 <div class="chips" id="disc">
 <button class="chip" data-k="Senior (60+)">Senior (60+)</button><button class="chip" data-k="Disability">Disability</button><button class="chip" data-k="Veteran">Veteran</button><button class="chip" data-k="Wheelchair accessible needed">Wheelchair needed</button></div>
-<p class="note">Discount eligibility is flagged for dispatch; estimate stays at the Town tariff. Present your card to the driver for the Town 25% discount; estimate shown is the full meter rate.</p>
-<label class="ck"><input type="checkbox" id="taxT" onchange="calc()"> Show tax line</label>
-<div id="taxBox" class="hide sqp"><div class="row"><span>Fare estimate</span><span id="fare2"></span></div><div class="row"><span>Tax (sample)</span><span>$0.00</span></div><p class="note">MA taxi meter fares — taxes TBD with accountant. Not applied to estimate.</p></div>
-<h3>Payment</h3>
-<div class="seg"><button id="pCash" class="on" onclick="setPay('Cash')">💵 Cash</button><button id="pCard" onclick="setPay('Card')">💳 Card (Square)</button></div>
-<div id="sqBox" class="sqp hide"><b>Pay with Square</b>
-<div id="sqLive" class="hide"><div id="card-container"></div><button class="btn" onclick="sqPay()">Authorize card</button><p class="note">Card is tokenized by Square. Charging requires the Cape Island Taxi server (coming next).</p></div>
-<div id="sqDemo"><p class="note">Card checkout via Square — connect your Square Application ID & Location ID to go live.</p><button class="sm" onclick="simPaid()">Simulate card paid (demo)</button> <span id="paidTag" class="note"></span></div></div>
+<p class="note">Flags go to dispatch. Present your card to the driver for the Town 25% discount.</p>
 <h3>Confirm by</h3>
 <div class="seg"><button id="cText" class="on" onclick="setConf('Text')">💬 Text</button><button id="cCall" onclick="setConf('Call')">📞 Call</button></div>
 <input type="text" id="name" aria-label="Your name" placeholder="Your name" style="margin-top:10px"><input type="tel" id="phone" aria-label="Phone" placeholder="Mobile number">
 <label class="ck"><input type="checkbox" id="sms"> Text me ride updates (msg & data rates may apply)</label>
-<button class="btn" id="goBtn" onclick="book()">Confirm ride · <span id="fare3">$3.00</span></button>
+<button class="btn" id="goBtn" onclick="book()"><span id="goTxt">Request ride</span></button>
 </section>
 <!-- INFO -->
 <section id="vInfo" class="hide">
 <h2>Ask Cape Island Taxi</h2>
-<p class="note">Quick answers (sample site). Tap a question:</p>
+<p class="note">Tap a question:</p>
 <div class="chips" id="qa"></div><div id="ans" class="ans hide" role="status"></div>
 <h3>Fares — Town of Falmouth tariff</h3>
 <details class="faq" open><summary>Meter rates</summary><div>Approved by the Falmouth Select Board (Jan 9, 2023):<br>• Flag / minimum: <b>$3.00</b><br>• <b>$0.75 per 1/5 mile</b> ($3.75/mile)<br>• Time in transit: <b>$0.45/min</b>, in addition to mileage<br>• Waiting: <b>$26/hr</b> after 3 free minutes at pickup<br>• Trunk items: <b>$0.50 each</b> (hand bags free)<br>The on-screen estimate uses distance only ($3.00 + $3.75/mile); your final fare is by the meter.</div></details>
@@ -122,12 +137,14 @@ a{color:var(--ac2)}
 <details class="faq"><summary>Out of town</summary><div>Trips leaving Falmouth are on the regular meter. No flat rates are permitted.</div></details>
 <h3>Service</h3>
 <details class="faq"><summary>Area & hours</summary><div>Falmouth & East Falmouth (demo), including the Woods Hole ferry terminal. Falmouth taxicab companies must operate 24/7 under town rules.</div></details>
+<details class="faq"><summary>Ferries & Martha’s Vineyard</summary><div>We drop off at the Woods Hole ferry terminal (Steamship Authority) for Martha’s Vineyard trips, and pick up arriving passengers at the ferry. Reserve ahead for a specific boat.</div></details>
+<details class="faq"><summary>Weekly work rides (prepaid)</summary><div>Book 3, 5 or 10 rides a week on the same route. A company prepaid weekly plan gets 10% off metered fares (sample offer) — <b>only when prepaid</b>. Rides paid one at a time are on the regular meter. This is a company offer, not a Town tariff.</div></details>
 <details class="faq"><summary>Extra stops</summary><div>Yes — tap “＋ Add stop” (up to 3). The fare continues on the meter through each stop; there is no separate stop fee.</div></details>
 <details class="faq"><summary>Live map</summary><div>The live driver map unlocks about 5 minutes before pickup.</div></details>
 <details class="faq"><summary>Payment & updates</summary><div>Choose cash or card. Card readers are planned. Opt in to SMS trip updates (demo).</div></details>
 <h3>Contact (sample)</h3>
 <div class="sqp"><div class="row"><span>Email</span><a style="color:var(--ac)" href="mailto:falmouthmataxi@gmail.com">falmouthmataxi@gmail.com</a></div><div class="row"><span>Phone</span><span>(508) 555-0199 (placeholder)</span></div><div class="row"><span>Location</span><span>Falmouth, MA</span></div></div>
-<p class="note">Soft launch / SAMPLE — not a live booking service.</p>
+<p class="note" style="font-size:11px">Soft launch — sample site.</p>
 <button class="btn" id="infoBack" onclick="hideInfo()">Book a ride</button>
 </section>
 <!-- TRIP -->
@@ -155,7 +172,7 @@ function drawMap(){[mP,mD,line,...mS].forEach(m=>m&&map.removeLayer(m));mP=mD=li
  else if(S.pc||S.dc)map.setView(S.pc||S.dc,14)}
 const money=n=>'$'+n.toFixed(2);
 function est(){const m=parseFloat($('mi').value)||0;return 3+3.75*m} // tariff only — never altered by flags/points
-function calc(){const f=money(est());$('fare').textContent=$('fare2').textContent=$('fare3').textContent=f;$('taxBox').classList.toggle('hide',!$('taxT').checked)}
+function calc(){} // fare shown on meter; est() kept internal for points
 function hav(a,b){const R=3958.8,r=x=>x*Math.PI/180,dl=r(b[0]-a[0]),dn=r(b[1]-a[1]),h=Math.sin(dl/2)**2+Math.cos(r(a[0]))*Math.cos(r(b[0]))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
 function route(){return [S.pc,...S.stops.filter(x=>x.c).map(x=>x.c),S.dc]}
 function auto(){drawMap();if(S.pc&&S.dc){const r=route();let d=0;for(let i=1;i<r.length;i++)d+=hav(r[i-1],r[i])*1.25;$('mi').value=d.toFixed(1);calc()}}
@@ -172,7 +189,9 @@ async function look(q){const r=await fetch('https://nominatim.openstreetmap.org/
 async function findDrop(){const q=$('drop').value.trim();if(!q)return toast('Type a destination');try{const c=await look(q);if(!c)return toast('Not found — enter miles manually');S.dc=c;
  if(!S.pc&&$('pick').value.trim()){S.pc=await look($('pick').value.trim())}auto();toast('Destination found')}catch(e){toast('Lookup failed — enter miles')}}
 $('pick').addEventListener('change',()=>{S.pc=null});
-function setMode(m){S.mode=m;$('mNow').classList.toggle('on',m=='now');$('mLater').classList.toggle('on',m=='later');$('laterBox').classList.toggle('hide',m=='now')}
+function setMode(m){S.mode=m;$('mNow').classList.toggle('on',m=='now');$('mLater').classList.toggle('on',m=='later');$('mWeek').classList.toggle('on',m=='week');$('laterBox').classList.toggle('hide',m!='later');$('weekBox').classList.toggle('hide',m!='week');$('goTxt').textContent=m=='week'?(S.wkPaid?'Book prepaid week':'Book week (pay per ride)'):m=='later'?'Reserve ride':'Request ride'}
+S.wkN=5;S.wkPaid=false;document.querySelectorAll('#wkN .chip').forEach(b=>b.onclick=()=>{document.querySelectorAll('#wkN .chip').forEach(x=>x.classList.toggle('on',x==b));S.wkN=+b.dataset.n;S.wkPaid=false;$('wkTag').textContent='';setMode('week')});
+function wkPrepay(){S.wkPaid=true;$('wkTag').textContent='✓ '+S.wkN+'-ride pack prepaid (demo) · 10% off applies';toast('Demo prepay — no card charged');setMode('week')}
 function setPay(p){S.pay=p;$('pCash').classList.toggle('on',p=='Cash');$('pCard').classList.toggle('on',p=='Card');$('sqBox').classList.toggle('hide',p!='Card');if(p=='Card')initSq()}
 function setConf(c){S.conf=c;$('cText').classList.toggle('on',c=='Text');$('cCall').classList.toggle('on',c=='Call')}
 function flag(k,on){on?S.flags.add(k):S.flags.delete(k);document.querySelectorAll('#disc .chip').forEach(b=>b.classList.toggle('on',S.flags.has(b.dataset.k)))}
@@ -193,14 +212,14 @@ function toast(t){const e=$('toast');e.textContent=t;e.style.opacity=1;clearTime
 // booking
 let T=null;const D=[['Mike R.','White Toyota Camry · CIT-1'],['Dana S.','Black Ford Escape · CIT-2']];
 function book(){if(!$('pick').value.trim()||!$('drop').value.trim())return toast('Add pickup and destination');if(!$('phone').value.trim())return toast('Add your mobile number');
- if(S.mode=='later'&&!$('when').value)return toast('Pick a reservation time');
- T={id:'CIT-'+Date.now().toString().slice(-5),pick:$('pick').value,drop:$('drop').value,stops:S.stops.map(x=>x.v.trim()).filter(Boolean),mi:parseFloat($('mi').value)||0,est:est(),pay:S.pay,paid:S.paid,conf:S.conf,sms:$('sms').checked,flags:[...S.flags],when:S.mode=='later'?$('when').value:'ASAP',name:$('name').value,phone:$('phone').value};
+ if(S.mode=='later'&&!$('when').value)return toast('Pick a reservation time');if(S.mode=='week'&&!$('wkStart').value)return toast('Pick week start & pickup time');
+ T={id:'CIT-'+Date.now().toString().slice(-5),pick:$('pick').value,drop:$('drop').value,stops:S.stops.map(x=>x.v.trim()).filter(Boolean),mi:parseFloat($('mi').value)||0,est:est(),pay:S.pay,paid:S.paid,conf:S.conf,sms:$('sms').checked,flags:[...S.flags],when:S.mode=='later'?$('when').value:S.mode=='week'?$('wkStart').value:'ASAP',week:S.mode=='week'?{n:S.wkN,prepaid:S.wkPaid}:null,name:$('name').value,phone:$('phone').value};
  localStorage.cit_lastTrip=JSON.stringify(T);S.step=0;$('vBook').classList.add('hide');$('vTrip').classList.remove('hide');window.scrollTo(0,0);render();toast('Demo request saved — no real ride booked')}
 function render(){const st=S.step,li=$('steps').children;[...li].forEach((l,i)=>l.classList.toggle('done',i<=st));
  $('tTitle').textContent=li[Math.min(st,4)].textContent;$('eta').textContent=['ETA —','~12 min','~5 min','Here','Done'][st];
  $('dName').textContent=st>0?D[0][0]:'Finding your driver…';$('dCar').textContent=st>0?D[0][1]:'';
  $('lock').classList.toggle('hide',!(st<2));
- $('tSum').innerHTML=`<div class="row"><span>Trip</span><span>${T.id}</span></div><div class="row"><span>When</span><span>${T.when=='ASAP'?'Now':T.when.replace('T',' ')}</span></div><div class="row"><span>Pickup</span><span style="text-align:right">${T.pick}</span></div>${T.stops.map((x,i)=>`<div class="row"><span>Stop ${i+1}</span><span style="text-align:right">${x}</span></div>`).join('')}<div class="row"><span>Destination</span><span style="text-align:right">${T.drop}</span></div><div class="row"><span>Miles</span><span>${T.mi.toFixed(1)}</span></div><div class="row"><span>Estimate</span><b>${money(T.est)}</b></div><div class="row"><span>Payment</span><span>${T.pay}${T.pay=='Card'?(T.paid?' · paid (demo)':' · pay at pickup'):''}</span></div><div class="row"><span>Confirm by</span><span>${T.conf}${T.sms?' · SMS on':''}</span></div>${T.flags.length?`<div class="row"><span>Flags</span><span style="text-align:right">${T.flags.join(', ')}</span></div><p class="note">Discount eligibility is flagged for dispatch; estimate stays at the Town tariff.</p>`:''}<p class="note">Estimate only — final fare by meter${T.stops.length?' (meter runs through each stop)':''}.</p>`;
+ $('tSum').innerHTML=`<div class="row"><span>Trip</span><span>${T.id}</span></div><div class="row"><span>When</span><span>${T.when=='ASAP'?'Now':T.when.replace('T',' ')}</span></div><div class="row"><span>Pickup</span><span style="text-align:right">${T.pick}</span></div>${T.stops.map((x,i)=>`<div class="row"><span>Stop ${i+1}</span><span style="text-align:right">${x}</span></div>`).join('')}<div class="row"><span>Destination</span><span style="text-align:right">${T.drop}</span></div><div class="row"><span>Miles</span><span>${T.mi.toFixed(1)}</span></div><div class="row"><span>Fare</span><b>On the meter</b></div>${T.week?`<div class="row"><span>Weekly plan</span><span>${T.week.n} rides · ${T.week.prepaid?'prepaid · 10% off':'pay per ride · meter'}</span></div>`:''}<div class="row"><span>Payment</span><span>${T.pay}${T.pay=='Card'?(T.paid?' · paid (demo)':' · pay at pickup'):''}</span></div><div class="row"><span>Confirm by</span><span>${T.conf}${T.sms?' · SMS on':''}</span></div>${T.flags.length?`<div class="row"><span>Flags</span><span style="text-align:right">${T.flags.join(', ')}</span></div><p class="note">Discount eligibility is flagged for dispatch; estimate stays at the Town tariff.</p>`:''}<p class="note">Estimate only — final fare by meter${T.stops.length?' (meter runs through each stop)':''}.</p>`;
  $('advBtn').classList.toggle('hide',st>=4)}
 function adv(){if(S.step>=4)return;S.step++;if(S.step==4){const n=Math.round(T.est);localStorage.cit_points=P()+n;showPts();toast(`Trip complete — +${n} points (demo)`)}render()}
 let infoFrom='vBook';function showInfo(){if(!$('vInfo').classList.contains('hide'))return;infoFrom=$('vTrip').classList.contains('hide')?'vBook':'vTrip';$('infoBack').textContent=infoFrom=='vTrip'?'← Back to my trip':'Book a ride';['vBook','vTrip'].forEach(v=>$(v).classList.add('hide'));$('vInfo').classList.remove('hide');window.scrollTo(0,0)}
@@ -210,7 +229,8 @@ const QA=[['How is the fare calculated?','Town meter: $3.00 flag, then $0.75 per
 ['Senior or disability discount?','Council on Aging senior card, MassRehab, or MCB card holders get the Town 25% discount. Present your card to the driver; the estimate shown is the full meter rate.'],
 ['When does the map show?','The live driver map unlocks about 5 minutes before pickup.'],
 ['Cash or card?','Choose cash or card when booking. Card readers are planned.'],
-['Woods Hole / ferry?','Yes — the Falmouth area, including the Woods Hole ferry terminal, is in our service area on the meter. The estimate uses miles.'],
+['Woods Hole / ferry?','Yes — we drop off at and pick up from the Woods Hole ferry terminal for Martha’s Vineyard travel, on the meter.'],
+['Weekly work rides?','Book 3, 5 or 10 rides a week on the same route. Prepaid packs get 10% off metered fares (company sample offer). Pay-per-ride stays on the meter.'],
 ['Hours?','Falmouth taxicab companies must operate 24/7 under town rules.'],
 ['Out of town?','Regular meter — no flat rates are permitted.']];
 $('qa').innerHTML=QA.map((q,i)=>`<button class="chip" onclick="ask(${i})">${q[0]}</button>`).join('');

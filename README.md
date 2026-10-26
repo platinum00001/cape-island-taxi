@@ -27,4 +27,4 @@ Supabase (accounts/bookings), Square prepay, SMS/calls, GPS map, real business p
 Rider discount flags (Senior/Disability/Veteran/Wheelchair) are dispatch tags only and never change the estimate. Loyalty points are a localStorage demo; redeem is not applied to fares.
 
 ## Theme
-Morning/light theme: cream→sky wash, white cards, navy text (#14213d), amber CTAs (#f59e0b). Info opened from trip status returns to the trip.
+Morning theme with faded Woods Hole lighthouse (assets/woods-hole-light.jpg, generated illustration). No demo banner or rates on the booking sheet (meter fare; tariff in Info). Weekly work rides: 3/5/10 pack, 10% off only when prepaid (company sample offer). Ferry drop-off & pickup for Martha’s Vineyard.
