@@ -2,8 +2,8 @@
 <title>Cape Island Taxi — Book a ride (Demo)</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-:root{--bg:#121417;--card:#1c1f24;--line:#2c3138;--tx:#f3f4f6;--mu:#9aa3ad;--ac:#f5b301;--ok:#22c55e}
-*{box-sizing:border-box}body{margin:0;background:#0a0b0d;color:var(--tx);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}
+:root{--bg:#f6f4ef;--card:#ffffff;--line:#e6e1d6;--tx:#14213d;--mu:#5f6b7a;--ac:#f59e0b;--ac2:#d97706;--sky:#e0f2fe;--ok:#16a34a}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#fff4e0 0%,#f6f4ef 40%,#eef6fb 100%);color:var(--tx);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}
 .app{max-width:430px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;display:flex;flex-direction:column}
 .demo{position:sticky;top:0;z-index:1000;background:#b91c1c;color:#fff;text-align:center;font:700 12px system-ui;padding:6px}
 header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px}
@@ -34,13 +34,43 @@ input[type=datetime-local],input[type=text],input[type=tel]{width:100%;backgroun
 .steps li.done{color:var(--tx)}.steps li.done:before{background:var(--ok);border-color:var(--ok)}
 .eta{display:inline-block;background:var(--ac);color:#111;border-radius:99px;padding:5px 12px;font-weight:800;font-size:13px}
 .drv{display:flex;gap:12px;align-items:center;background:var(--bg);border-radius:14px;padding:12px;margin:12px 0}.av{width:46px;height:46px;border-radius:50%;background:var(--line);display:grid;place-items:center;font-size:22px}
-.hide{display:none}#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#fff;color:#111;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:.3s;z-index:2000}
-.lock{position:absolute;inset:0;background:rgba(10,11,13,.85);display:grid;place-items:center;text-align:center;z-index:600;font-size:14px;padding:20px}
+.hide{display:none}#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#14213d;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:.3s;z-index:2000}
+.lock{position:absolute;inset:0;background:rgba(255,250,240,.9);color:var(--tx);font-weight:600;display:grid;place-items:center;text-align:center;z-index:600;font-size:14px;padding:20px}
 .mapwrap{position:relative}
 .num{background:#fff;color:#111;border-radius:50%;width:22px;height:22px;display:grid;place-items:center;font:800 12px system-ui;border:2px solid var(--ac)}
 .hd{display:flex;gap:8px}.faq{border:1px solid var(--line);border-radius:14px;margin-bottom:8px;background:var(--bg)}.faq summary{padding:13px 14px;font-weight:700;cursor:pointer;list-style:none}.faq summary::after{content:"+";float:right;color:var(--ac)}.faq[open] summary::after{content:"–"}.faq div{padding:0 14px 13px;color:var(--mu);font-size:14px;line-height:1.5}
 .ans{background:var(--bg);border:1px solid var(--ac);border-radius:14px;padding:12px 14px;margin:10px 0;font-size:14px;line-height:1.5}
 .stoprm{background:none;border:0;color:var(--mu);font-size:18px;padding:0 8px}
+
+/* Morning theme overrides */
+.demo{background:#fef3c7;color:#92400e;border-bottom:1px solid #fcd34d}
+header{background:linear-gradient(180deg,#fff7e6,#fffdf8);border-bottom:1px solid var(--line);padding:12px 16px}
+.logo{font-size:19px;letter-spacing:-.02em;color:var(--tx)}.logo b{color:var(--ac2)}
+.pts{color:var(--tx);min-height:40px;font-weight:600;box-shadow:0 1px 2px rgba(20,33,61,.06)}
+#infoBtn{background:var(--sky);border-color:#bae6fd;color:#075985}
+.sheet{box-shadow:0 -8px 24px rgba(20,33,61,.08);background:linear-gradient(180deg,#fffaf0 0,#fff 70px)}
+h2{letter-spacing:-.02em;font-size:24px}h3{font-size:12px;font-weight:700}
+.field{background:#fff;box-shadow:0 1px 2px rgba(20,33,61,.05);position:relative;min-height:52px}
+.field:focus-within{border-color:var(--ac);box-shadow:0 0 0 3px rgba(245,158,11,.18)}
+.field input::placeholder{color:#94a3b8}
+#stops .field,.field.dst{margin-left:0}
+.chain{position:relative}.chain:before{content:"";position:absolute;left:16px;top:26px;bottom:26px;width:2px;background:repeating-linear-gradient(var(--line) 0 4px,transparent 4px 8px);z-index:0}
+.chain .field{z-index:1}.dot{flex:none;box-shadow:0 0 0 3px #dcfce7}.dot.sq{box-shadow:0 0 0 3px #fef3c7}
+.sm{background:#f1ede4;color:var(--tx);font-weight:600}
+.btn{background:linear-gradient(180deg,#fbbf24,#f59e0b);color:#1f1300;box-shadow:0 6px 16px rgba(245,158,11,.35);letter-spacing:-.01em}
+.btn:active{transform:translateY(1px)}.btn.alt{background:#eef2f7;color:var(--tx);box-shadow:none}
+.seg{background:#f1ede4}.seg button{min-height:44px;font-weight:700}.seg button.on{background:#14213d;color:#fff;box-shadow:0 2px 6px rgba(20,33,61,.2)}
+.ride{background:#fff;border-color:var(--line)}.ride.on{background:#fffbeb;box-shadow:0 4px 14px rgba(245,158,11,.18)}
+.ride .p{font-size:26px;color:var(--tx);letter-spacing:-.02em}
+.av{background:var(--sky)!important}
+.chip{background:#fff}.chip.on{color:#1f1300}
+.sqp,.faq,.drv{background:#fff;box-shadow:0 1px 3px rgba(20,33,61,.06)}
+.ans{background:#fffbeb}
+input[type=datetime-local],input[type=text],input[type=tel],input[type=number]{background:#fff}
+.steps li.done:before{box-shadow:0 0 0 3px #dcfce7}
+.eta{background:var(--sky);color:#075985}
+.num{border-color:var(--ac2);color:#14213d}
+a{color:var(--ac2)}
 </style></head><body><div class="app">
 <div class="demo" role="note">SAMPLE / DEMO ONLY — not a live booking service</div>
 <header><div class="logo">Cape Island <b>Taxi</b></div><div class="hd"><button class="pts" id="infoBtn" onclick="showInfo()" aria-label="Taxi info and FAQ">ⓘ Info</button><button class="pts" id="ptsBtn" aria-label="Loyalty points">★ <span id="pts">0</span> pts</button></div></header>
@@ -52,12 +82,12 @@ input[type=datetime-local],input[type=text],input[type=tel]{width:100%;backgroun
 <h2>Where to?</h2>
 <div class="seg" role="tablist"><button id="mNow" class="on" onclick="setMode('now')">Ride now</button><button id="mLater" onclick="setMode('later')">Reserve</button></div>
 <div id="laterBox" class="hide" style="margin-top:10px"><label class="note" for="when">Pickup date & time</label><input type="datetime-local" id="when"></div>
-<div style="margin-top:12px">
+<div class="chain" style="margin-top:12px">
 <div class="field"><span class="dot"></span><input id="pick" aria-label="Pickup address" placeholder="Pickup (Falmouth / East Falmouth)"><button class="sm" onclick="gpsPick()">📍 My location</button></div>
 <div id="stops"></div>
 <button class="sm" id="addStop" onclick="addStop()" style="margin-bottom:8px">＋ Add stop</button>
 <div class="field"><span class="dot sq"></span><input id="drop" aria-label="Destination" placeholder="Destination"><button class="sm" onclick="findDrop()">Find</button><button class="sm" onclick="gpsDrop()" title="Use GPS as drop">📍</button></div>
-<div class="field"><span style="color:var(--mu);font-size:13px">Miles</span><input id="mi" type="number" step="0.1" min="0" aria-label="Trip miles" placeholder="auto from map, or type" oninput="calc()"></div>
+</div><div><div class="field"><span style="color:var(--mu);font-size:13px">Miles</span><input id="mi" type="number" step="0.1" min="0" aria-label="Trip miles" placeholder="auto from map, or type" oninput="calc()"></div>
 </div>
 <p class="note">Service area: Falmouth & East Falmouth. Miles auto = straight line × 1.25 per leg (pickup → stops → destination). Extra stops: no flat stop fee — the meter keeps running through each stop.</p>
 <h3>Choose a ride</h3>
@@ -98,7 +128,7 @@ input[type=datetime-local],input[type=text],input[type=tel]{width:100%;backgroun
 <h3>Contact (sample)</h3>
 <div class="sqp"><div class="row"><span>Email</span><a style="color:var(--ac)" href="mailto:falmouthmataxi@gmail.com">falmouthmataxi@gmail.com</a></div><div class="row"><span>Phone</span><span>(508) 555-0199 (placeholder)</span></div><div class="row"><span>Location</span><span>Falmouth, MA</span></div></div>
 <p class="note">Soft launch / SAMPLE — not a live booking service.</p>
-<button class="btn" onclick="hideInfo()">Book a ride</button>
+<button class="btn" id="infoBack" onclick="hideInfo()">Book a ride</button>
 </section>
 <!-- TRIP -->
 <section id="vTrip" class="hide">
@@ -119,9 +149,9 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,att
 let mP,mD,line,mS=[];S.stops=[];
 function drawMap(){[mP,mD,line,...mS].forEach(m=>m&&map.removeLayer(m));mP=mD=line=null;mS=[];
  S.stops.forEach((st,i)=>{if(st.c)mS.push(L.marker(st.c,{icon:L.divIcon({className:'',html:`<div class="num">${i+1}</div>`,iconSize:[22,22],iconAnchor:[11,11]})}).addTo(map).bindTooltip('Stop '+(i+1)))});
- if(S.pc)mP=L.circleMarker(S.pc,{radius:9,color:'#22c55e',fillOpacity:1}).addTo(map).bindTooltip('Pickup');
- if(S.dc)mD=L.circleMarker(S.dc,{radius:9,color:'#f5b301',fillOpacity:1}).addTo(map).bindTooltip('Drop');
- if(S.pc&&S.dc){line=L.polyline(route(),{color:'#f5b301',dashArray:'6 6'}).addTo(map);map.fitBounds(line.getBounds(),{padding:[40,40]})}
+ if(S.pc)mP=L.circleMarker(S.pc,{radius:9,color:'#15803d',fillColor:'#22c55e',fillOpacity:1}).addTo(map).bindTooltip('Pickup');
+ if(S.dc)mD=L.circleMarker(S.dc,{radius:9,color:'#d97706',fillColor:'#f59e0b',fillOpacity:1}).addTo(map).bindTooltip('Drop');
+ if(S.pc&&S.dc){line=L.polyline(route(),{color:'#1d4ed8',weight:4,opacity:.8,dashArray:'8 6'}).addTo(map);map.fitBounds(line.getBounds(),{padding:[40,40]})}
  else if(S.pc||S.dc)map.setView(S.pc||S.dc,14)}
 const money=n=>'$'+n.toFixed(2);
 function est(){const m=parseFloat($('mi').value)||0;return 3+3.75*m} // tariff only — never altered by flags/points
@@ -173,8 +203,8 @@ function render(){const st=S.step,li=$('steps').children;[...li].forEach((l,i)=>
  $('tSum').innerHTML=`<div class="row"><span>Trip</span><span>${T.id}</span></div><div class="row"><span>When</span><span>${T.when=='ASAP'?'Now':T.when.replace('T',' ')}</span></div><div class="row"><span>Pickup</span><span style="text-align:right">${T.pick}</span></div>${T.stops.map((x,i)=>`<div class="row"><span>Stop ${i+1}</span><span style="text-align:right">${x}</span></div>`).join('')}<div class="row"><span>Destination</span><span style="text-align:right">${T.drop}</span></div><div class="row"><span>Miles</span><span>${T.mi.toFixed(1)}</span></div><div class="row"><span>Estimate</span><b>${money(T.est)}</b></div><div class="row"><span>Payment</span><span>${T.pay}${T.pay=='Card'?(T.paid?' · paid (demo)':' · pay at pickup'):''}</span></div><div class="row"><span>Confirm by</span><span>${T.conf}${T.sms?' · SMS on':''}</span></div>${T.flags.length?`<div class="row"><span>Flags</span><span style="text-align:right">${T.flags.join(', ')}</span></div><p class="note">Discount eligibility is flagged for dispatch; estimate stays at the Town tariff.</p>`:''}<p class="note">Estimate only — final fare by meter${T.stops.length?' (meter runs through each stop)':''}.</p>`;
  $('advBtn').classList.toggle('hide',st>=4)}
 function adv(){if(S.step>=4)return;S.step++;if(S.step==4){const n=Math.round(T.est);localStorage.cit_points=P()+n;showPts();toast(`Trip complete — +${n} points (demo)`)}render()}
-function showInfo(){['vBook','vTrip'].forEach(v=>$(v).classList.add('hide'));$('vInfo').classList.remove('hide');window.scrollTo(0,0)}
-function hideInfo(){$('vInfo').classList.add('hide');$('vBook').classList.remove('hide')}
+let infoFrom='vBook';function showInfo(){if(!$('vInfo').classList.contains('hide'))return;infoFrom=$('vTrip').classList.contains('hide')?'vBook':'vTrip';$('infoBack').textContent=infoFrom=='vTrip'?'← Back to my trip':'Book a ride';['vBook','vTrip'].forEach(v=>$(v).classList.add('hide'));$('vInfo').classList.remove('hide');window.scrollTo(0,0)}
+function hideInfo(){$('vInfo').classList.add('hide');$(infoFrom).classList.remove('hide');window.scrollTo(0,0)}
 const QA=[['How is the fare calculated?','Town meter: $3.00 flag, then $0.75 per 1/5 mile ($3.75/mile), plus $0.45/min time in transit, waiting $26/hr after 3 free minutes, trunk items $0.50 each. Our estimate uses distance only — final fare by meter.'],
 ['Can I add a stop?','Yes — tap “＋ Add stop” for up to 3 stops. The meter keeps running through each stop; no separate stop fee.'],
 ['Senior or disability discount?','Council on Aging senior card, MassRehab, or MCB card holders get the Town 25% discount. Present your card to the driver; the estimate shown is the full meter rate.'],

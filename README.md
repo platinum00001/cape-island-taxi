@@ -25,3 +25,6 @@ Supabase (accounts/bookings), Square prepay, SMS/calls, GPS map, real business p
 4. A real charge still needs a server (e.g. Supabase Edge Function calling Square Payments/Checkout API) to exchange the token — being wired next. Note: because GitHub Pages deploys only committed files, go-live needs the IDs committed (App ID + Location ID are public-safe; the Access Token must never be in this repo).
 
 Rider discount flags (Senior/Disability/Veteran/Wheelchair) are dispatch tags only and never change the estimate. Loyalty points are a localStorage demo; redeem is not applied to fares.
+
+## Theme
+Morning/light theme: cream→sky wash, white cards, navy text (#14213d), amber CTAs (#f59e0b). Info opened from trip status returns to the trip.
