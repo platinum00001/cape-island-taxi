@@ -17,3 +17,11 @@ Served from `main` branch, root folder. Custom domain to be wired later.
 
 ## Not wired yet
 Supabase (accounts/bookings), Square prepay, SMS/calls, GPS map, real business phone (placeholder (508) 555-0199).
+
+## Square card payments (setup)
+1. `cp config.example.js config.js` (config.js is gitignored).
+2. Paste your Square **Application ID** and **Location ID** (Square Developer Dashboard) and set `SQUARE_ENV`.
+3. With values set, the Card option loads the Square Web Payments SDK and tokenizes the card. Without them, a demo "Simulate card paid" button is shown.
+4. A real charge still needs a server (e.g. Supabase Edge Function calling Square Payments/Checkout API) to exchange the token — being wired next. Note: because GitHub Pages deploys only committed files, go-live needs the IDs committed (App ID + Location ID are public-safe; the Access Token must never be in this repo).
+
+Rider discount flags (Senior/Disability/Veteran/Wheelchair) are dispatch tags only and never change the estimate. Loyalty points are a localStorage demo; redeem is not applied to fares.

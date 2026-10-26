@@ -1,92 +1,146 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b4f6c"><title>Cape Island Taxi — SAMPLE / DEMO</title>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cape Island Taxi — Book a ride (Demo)</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:#f3f7f9;color:#14232b}
-.demo{background:#c62828;color:#fff;text-align:center;padding:8px;font-weight:700;font-size:14px;position:sticky;top:0;z-index:9}
-header{background:linear-gradient(135deg,#0b4f6c,#1d8fb0);color:#fff;padding:18px 16px}header h1{margin:0;font-size:24px}header p{margin:4px 0 0;opacity:.9}
-nav{display:flex;overflow-x:auto;background:#fff;border-bottom:1px solid #dde}nav button{flex:1;border:0;background:none;padding:12px 10px;font-size:15px;white-space:nowrap}nav button.on{border-bottom:3px solid #f2b705;font-weight:700}
-main{max-width:560px;margin:auto;padding:14px}.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px #0001}
-label{display:block;font-size:13px;font-weight:600;margin:10px 0 4px}input,select{width:100%;padding:11px;font-size:16px;border:1px solid #bcc;border-radius:8px}
-.btn{width:100%;padding:14px;margin-top:14px;font-size:17px;font-weight:700;border:0;border-radius:10px;background:#f2b705;color:#14232b}.btn.alt{background:#0b4f6c;color:#fff}
-.chips{display:flex;flex-wrap:wrap;gap:6px}.chips button{border:1px solid #0b4f6c;background:#fff;color:#0b4f6c;border-radius:20px;padding:6px 10px;font-size:13px}
-.fare{font-size:30px;font-weight:800;color:#0b4f6c}.small{font-size:12px;color:#556}.row{display:flex;gap:8px}.row>*{flex:1}
-.sec{display:none}.sec.on{display:block}.steps li{padding:6px 0}.steps li.done{color:#1b7f3b;font-weight:700}
-#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#14232b;color:#fff;padding:12px 16px;border-radius:8px;display:none;max-width:90%}
-.chk{display:flex;gap:8px;align-items:center;margin-top:10px}.chk input{width:auto}
-</style></head><body>
-<div class="demo">SAMPLE / DEMO ONLY — not a live booking service. No rides, payments, texts or calls are real.</div>
-<header><h1>🚕 Cape Island Taxi</h1><p>Local rides around Falmouth &amp; East Falmouth (sample site)</p></header>
-<nav id="nav"><button data-s="est" class="on">Estimate</button><button data-s="now">Book now</button><button data-s="later">Reserve</button><button data-s="status">My trip</button><button data-s="prefs">Prefs</button></nav>
-<main>
-<section id="est" class="sec on"><div class="card"><h3>Fare estimate</h3>
-<label>Pickup</label><input id="ePick" placeholder="Street address, Falmouth">
-<button class="btn alt" style="margin-top:6px;padding:10px;font-size:15px" onclick="gpsPick()">📍 Use my location for pickup</button>
-<div class="small" id="pickInfo"></div>
-<label>Where are you going?</label><input id="eDrop" placeholder="Street address or place, e.g. Falmouth Hospital">
-<div class="row"><button class="btn alt" style="margin-top:6px;padding:10px;font-size:15px" onclick="findDrop()">🔎 Find address</button><button class="btn alt" style="margin-top:6px;padding:10px;font-size:15px" onclick="gpsDrop()">📍 I'm at drop-off</button></div>
-<div class="small" id="dropInfo">Or paste coordinates like 41.5515, -70.6148</div>
-<label>Common local stops (sample, approx. miles from Falmouth center)</label>
-<div class="chips" id="presets"></div>
-<label>Miles <span class="small" id="milesSrc">(manual)</span></label><input id="eMiles" type="number" min="0" step="0.1" value="2">
-<div style="margin-top:14px" class="fare" id="eFare"></div>
-<p class="small">Estimate — metered at the Town-approved tariff ($3.00 flag + $3.75 per mile). Final fare is by the meter. GPS miles are straight-line ×1.25 road allowance and can still be under real road miles (same caveat as the taxi meter). Location lookups use free OpenStreetMap; nothing is stored on a server. Sample service area: Falmouth / East Falmouth only.</p>
-<button class="btn" onclick="go('now',1)">Book this ride</button></div></section>
-
-<section id="now" class="sec"><div class="card"><h3>Book now</h3><div id="fNow"></div><button class="btn" onclick="book('now')">Request ride (demo)</button></div></section>
-<section id="later" class="sec"><div class="card"><h3>Future reservation</h3><div class="row"><div><label>Date</label><input id="rDate" type="date"></div><div><label>Time</label><input id="rTime" type="time"></div></div><div id="fLater"></div><button class="btn" onclick="book('later')">Reserve ride (demo)</button></div></section>
-
-<section id="status" class="sec"><div class="card" id="stCard"><p>No trip yet. Book or reserve one to see the demo status.</p></div></section>
-
-<section id="prefs" class="sec"><div class="card"><h3>Preferences</h3>
-<div class="chk"><input type="checkbox" id="pSms"><span>Text me trip updates (SMS opt-in, demo)</span></div>
-<label>Payment preference</label><select id="pPay"><option>Cash</option><option>Card</option></select>
-<button class="btn alt" onclick="savePrefs()">Save</button>
-<p class="small">Stored only in this browser. Business phone: number TBD (sample shows (508) 555-0199 placeholder).</p></div></section>
-</main><div id="toast"></div>
+:root{--bg:#121417;--card:#1c1f24;--line:#2c3138;--tx:#f3f4f6;--mu:#9aa3ad;--ac:#f5b301;--ok:#22c55e}
+*{box-sizing:border-box}body{margin:0;background:#0a0b0d;color:var(--tx);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}
+.app{max-width:430px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;display:flex;flex-direction:column}
+.demo{position:sticky;top:0;z-index:1000;background:#b91c1c;color:#fff;text-align:center;font:700 12px system-ui;padding:6px}
+header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px}
+.logo{font-weight:800}.logo b{color:var(--ac)}.pts{background:var(--card);border:1px solid var(--line);border-radius:99px;padding:6px 12px;font-size:13px}
+#map{height:38vh;min-height:240px}
+.sheet{background:var(--card);border-radius:20px 20px 0 0;margin-top:-18px;position:relative;z-index:500;padding:18px 16px 30px;flex:1}
+.grab{width:40px;height:4px;background:var(--line);border-radius:4px;margin:0 auto 12px}
+h2{margin:4px 0 12px;font-size:22px}h3{font-size:14px;color:var(--mu);margin:18px 0 8px;text-transform:uppercase;letter-spacing:.05em}
+.field{display:flex;gap:8px;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:4px 6px 4px 12px;margin-bottom:8px}
+.field input{flex:1;background:none;border:0;color:var(--tx);font-size:16px;padding:10px 0;min-width:0}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--ok)}.dot.sq{border-radius:2px;background:var(--ac)}
+button{font:inherit;cursor:pointer}.sm{background:var(--line);color:var(--tx);border:0;border-radius:9px;padding:10px;font-size:13px;min-height:40px}
+.btn{width:100%;background:var(--ac);color:#111;border:0;border-radius:14px;padding:16px;font-weight:800;font-size:17px;margin-top:14px;min-height:54px}
+.btn.alt{background:var(--line);color:var(--tx)}
+.seg{display:flex;background:var(--bg);border-radius:12px;padding:4px;gap:4px}.seg button{flex:1;border:0;background:none;color:var(--mu);padding:11px;border-radius:9px;font-weight:600}
+.seg button.on{background:var(--line);color:var(--tx)}
+.ride{display:flex;align-items:center;gap:12px;border:2px solid var(--line);border-radius:14px;padding:12px;margin-bottom:8px}
+.ride.on{border-color:var(--ac)}.ride .p{margin-left:auto;font-weight:800;font-size:18px;text-align:right}.ride small{color:var(--mu);display:block;font-weight:400;font-size:12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{border:1px solid var(--line);background:var(--bg);color:var(--tx);border-radius:99px;padding:9px 13px;font-size:14px;min-height:40px}
+.chip.on{background:var(--ac);color:#111;border-color:var(--ac);font-weight:700}
+.note{color:var(--mu);font-size:12.5px;line-height:1.45;margin:8px 0}.row{display:flex;justify-content:space-between;font-size:14px;padding:4px 0}
+.sqp{border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:10px;background:var(--bg)}
+#card-container{min-height:0}
+label.ck{display:flex;gap:10px;align-items:center;font-size:14px;margin-top:12px}
+input[type=datetime-local],input[type=text],input[type=tel]{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--tx);border-radius:12px;padding:12px;font-size:16px;margin-bottom:8px}
+.steps{list-style:none;padding:0;margin:0}.steps li{padding:10px 0 10px 28px;position:relative;color:var(--mu)}
+.steps li:before{content:"";position:absolute;left:4px;top:14px;width:12px;height:12px;border-radius:50%;border:2px solid var(--line)}
+.steps li.done{color:var(--tx)}.steps li.done:before{background:var(--ok);border-color:var(--ok)}
+.eta{display:inline-block;background:var(--ac);color:#111;border-radius:99px;padding:5px 12px;font-weight:800;font-size:13px}
+.drv{display:flex;gap:12px;align-items:center;background:var(--bg);border-radius:14px;padding:12px;margin:12px 0}.av{width:46px;height:46px;border-radius:50%;background:var(--line);display:grid;place-items:center;font-size:22px}
+.hide{display:none}#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#fff;color:#111;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:.3s;z-index:2000}
+.lock{position:absolute;inset:0;background:rgba(10,11,13,.85);display:grid;place-items:center;text-align:center;z-index:600;font-size:14px;padding:20px}
+.mapwrap{position:relative}
+</style></head><body><div class="app">
+<div class="demo" role="note">SAMPLE / DEMO ONLY — not a live booking service</div>
+<header><div class="logo">Cape Island <b>Taxi</b></div><button class="pts" id="ptsBtn" aria-label="Loyalty points">★ <span id="pts">0</span> pts</button></header>
+<div class="mapwrap"><div id="map" aria-label="Map"></div><div id="lock" class="lock hide">🔒 Live driver map unlocks when your driver is ~5 minutes away</div></div>
+<main class="sheet">
+<div class="grab"></div>
+<!-- BOOK -->
+<section id="vBook">
+<h2>Where to?</h2>
+<div class="seg" role="tablist"><button id="mNow" class="on" onclick="setMode('now')">Ride now</button><button id="mLater" onclick="setMode('later')">Reserve</button></div>
+<div id="laterBox" class="hide" style="margin-top:10px"><label class="note" for="when">Pickup date & time</label><input type="datetime-local" id="when"></div>
+<div style="margin-top:12px">
+<div class="field"><span class="dot"></span><input id="pick" aria-label="Pickup address" placeholder="Pickup (Falmouth / East Falmouth)"><button class="sm" onclick="gpsPick()">📍 My location</button></div>
+<div class="field"><span class="dot sq"></span><input id="drop" aria-label="Destination" placeholder="Destination"><button class="sm" onclick="findDrop()">Find</button><button class="sm" onclick="gpsDrop()" title="Use GPS as drop">📍</button></div>
+<div class="field"><span style="color:var(--mu);font-size:13px">Miles</span><input id="mi" type="number" step="0.1" min="0" aria-label="Trip miles" placeholder="auto from map, or type" oninput="calc()"></div>
+</div>
+<p class="note">Service area: Falmouth & East Falmouth. Miles auto = straight line × 1.25.</p>
+<h3>Choose a ride</h3>
+<div class="ride on" id="rStd" onclick="pickRide('std')" role="button" tabindex="0"><div class="av">🚕</div><div><b>Standard Taxi</b><small>Up to 4 riders · 2-car local fleet</small></div><div class="p"><span id="fare">$3.00</span><small>estimate</small></div></div>
+<div class="ride" id="rWav" onclick="pickRide('wav')" role="button" tabindex="0"><div class="av">♿</div><div><b>Accessible request</b><small>Adds a wheelchair note for dispatch</small></div><div class="p"><small>request note</small></div></div>
+<p class="note">$3.00 flag + $3.75/mile. Estimate only — final fare by the meter.</p>
+<h3>Rider discount eligibility</h3>
+<div class="chips" id="disc">
+<button class="chip" data-k="Senior (60+)">Senior (60+)</button><button class="chip" data-k="Disability">Disability</button><button class="chip" data-k="Veteran">Veteran</button><button class="chip" data-k="Wheelchair accessible needed">Wheelchair needed</button></div>
+<p class="note">Discount eligibility is flagged for dispatch; estimate stays at the Town tariff.</p>
+<label class="ck"><input type="checkbox" id="taxT" onchange="calc()"> Show tax line</label>
+<div id="taxBox" class="hide sqp"><div class="row"><span>Fare estimate</span><span id="fare2"></span></div><div class="row"><span>Tax (sample)</span><span>$0.00</span></div><p class="note">MA taxi meter fares — taxes TBD with accountant. Not applied to estimate.</p></div>
+<h3>Payment</h3>
+<div class="seg"><button id="pCash" class="on" onclick="setPay('Cash')">💵 Cash</button><button id="pCard" onclick="setPay('Card')">💳 Card (Square)</button></div>
+<div id="sqBox" class="sqp hide"><b>Pay with Square</b>
+<div id="sqLive" class="hide"><div id="card-container"></div><button class="btn" onclick="sqPay()">Authorize card</button><p class="note">Card is tokenized by Square. Charging requires the Cape Island Taxi server (coming next).</p></div>
+<div id="sqDemo"><p class="note">Card checkout via Square — connect your Square Application ID & Location ID to go live.</p><button class="sm" onclick="simPaid()">Simulate card paid (demo)</button> <span id="paidTag" class="note"></span></div></div>
+<h3>Confirm by</h3>
+<div class="seg"><button id="cText" class="on" onclick="setConf('Text')">💬 Text</button><button id="cCall" onclick="setConf('Call')">📞 Call</button></div>
+<input type="text" id="name" aria-label="Your name" placeholder="Your name" style="margin-top:10px"><input type="tel" id="phone" aria-label="Phone" placeholder="Mobile number">
+<label class="ck"><input type="checkbox" id="sms"> Text me ride updates (msg & data rates may apply)</label>
+<button class="btn" id="goBtn" onclick="book()">Confirm ride · <span id="fare3">$3.00</span></button>
+</section>
+<!-- TRIP -->
+<section id="vTrip" class="hide">
+<div style="display:flex;justify-content:space-between;align-items:center"><h2 id="tTitle">Request received</h2><span class="eta" id="eta">ETA —</span></div>
+<div class="drv"><div class="av">🧑‍✈️</div><div><b id="dName">Finding your driver…</b><div class="note" style="margin:2px 0" id="dCar"></div></div></div>
+<ol class="steps" id="steps"><li>Request received</li><li>Driver assigned</li><li>~5 min away — map unlocked</li><li>Driver is here</li><li>Trip complete</li></ol>
+<div class="sqp" id="tSum"></div>
+<button class="btn" id="advBtn" onclick="adv()">Simulate next step (demo)</button>
+<button class="btn alt" onclick="reset()">Back to booking</button>
+</section>
+</main></div><div id="toast" role="status"></div>
+<script src="config.js" onerror="window.SQUARE_APP_ID=''"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const FLAG=3,PER=3.75,$=id=>document.getElementById(id);
-const P=[["Walmart (Falmouth)",2.5],["Falmouth Hospital",1.5],["Falmouth Bus Depot",1],["Woods Hole Ferry",4],["Main St, Falmouth",1],["East Falmouth Center",3.5]];
-const fare=m=>FLAG+PER*Math.max(0,+m||0);
-function upd(){$('eFare').textContent='$'+fare($('eMiles').value).toFixed(2)+' est.'}
-$('presets').innerHTML=P.map((p,i)=>`<button onclick="pre(${i})">${p[0]}</button>`).join('');
-function pre(i){$('eDrop').value=P[i][0];dropLL=null;$('eMiles').value=P[i][1];$('milesSrc').textContent='(preset, rough)';$('dropInfo').textContent='';upd()}
-let pickLL=null,dropLL=null;const ROAD=1.25;
-function hav(a,b){const R=3958.8,r=x=>x*Math.PI/180,dl=r(b[0]-a[0]),dn=r(b[1]-a[1]);const h=Math.sin(dl/2)**2+Math.cos(r(a[0]))*Math.cos(r(b[0]))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
-function calc(){if(pickLL&&dropLL){const st=hav(pickLL,dropLL);$('eMiles').value=(st*ROAD).toFixed(1);$('milesSrc').textContent=`(auto from GPS: ${st.toFixed(1)} mi straight-line ×${ROAD})`;upd()}}
-const ll=p=>p[0].toFixed(5)+', '+p[1].toFixed(5);
-async function rev(p){try{const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${p[0]}&lon=${p[1]}&zoom=18`);const j=await r.json();return j.display_name?j.display_name.split(',').slice(0,3).join(','):null}catch(e){return null}}
-function geo(cb){if(!navigator.geolocation)return toast('Location not available — type the address instead');toast('Getting your location…');
- navigator.geolocation.getCurrentPosition(p=>cb([p.coords.latitude,p.coords.longitude],p.coords.accuracy),e=>toast('Location denied/unavailable — type the address instead'),{enableHighAccuracy:true,timeout:15000})}
-function gpsPick(){geo(async(p,acc)=>{pickLL=p;$('ePick').value=ll(p);$('pickInfo').textContent=`GPS ${ll(p)} (±${Math.round(acc)} m)`;const n=await rev(p);if(n){$('ePick').value=n;$('pickInfo').textContent+=' · '+n}calc()})}
-function gpsDrop(){geo(async(p,acc)=>{dropLL=p;$('eDrop').value=ll(p);$('dropInfo').textContent=`GPS ${ll(p)} (±${Math.round(acc)} m)`;const n=await rev(p);if(n){$('eDrop').value=n}calc()})}
-async function findDrop(){const q=$('eDrop').value.trim();if(!q)return toast('Type where you are going');
- const m=q.match(/^\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*$/);if(m){dropLL=[+m[1],+m[2]];$('dropInfo').textContent='Coordinates '+ll(dropLL);return calc()}
- try{const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=us&viewbox=-70.75,41.65,-70.45,41.50&q='+encodeURIComponent(q));const j=await r.json();
- if(!j.length)return toast('Address not found — enter miles manually');dropLL=[+j[0].lat,+j[0].lon];$('dropInfo').textContent='Found: '+j[0].display_name.split(',').slice(0,3).join(',');
- if(!pickLL)toast('Now tap “Use my location” for pickup to auto-calc miles');calc()}catch(e){toast('Lookup failed — enter miles manually')}}
-$('eDrop').addEventListener('input',()=>{dropLL=null});$('ePick').addEventListener('input',()=>{pickLL=null;$('pickInfo').textContent=''});
-$('eMiles').oninput=()=>{$('milesSrc').textContent='(manual)';upd()};upd();
-const prefs=JSON.parse(localStorage.citPrefs||'{"sms":true,"pay":"Cash"}');$('pSms').checked=prefs.sms;$('pPay').value=prefs.pay;
-function savePrefs(){prefs.sms=$('pSms').checked;prefs.pay=$('pPay').value;localStorage.citPrefs=JSON.stringify(prefs);toast('Preferences saved (this browser only)')}
-const fields=k=>`<label>Name</label><input id="${k}Name"><label>Phone</label><input id="${k}Phone" type="tel" placeholder="(508) 555-0123">
-<label>Pickup</label><input id="${k}Pick"><label>Drop-off</label><input id="${k}Drop"><label>Approx. miles</label><input id="${k}Miles" type="number" step="0.1">
-<label>Pay with</label><select id="${k}Pay"><option>Cash</option><option>Card</option></select>
-<label>Confirm by</label><select id="${k}Conf"><option>Text</option><option>Call</option></select>
-<div class="chk"><input type="checkbox" id="${k}Sms"><span>OK to text me about this trip (SMS opt-in)</span></div>`;
-$('fNow').innerHTML=fields('n');$('fLater').innerHTML=fields('l');
-function go(s,fill){document.querySelectorAll('.sec').forEach(e=>e.classList.toggle('on',e.id==s));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.s==s));
- ['n','l'].forEach(k=>{$(k+'Pay').value=prefs.pay;$(k+'Sms').checked=prefs.sms;if(fill){$(k+'Pick').value=$('ePick').value;$(k+'Drop').value=$('eDrop').value;$(k+'Miles').value=$('eMiles').value}})}
-document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>go(b.dataset.s));
-function toast(t){const e=$('toast');e.textContent=t;e.style.display='block';clearTimeout(e.t);e.t=setTimeout(()=>e.style.display='none',3500)}
-function book(type){const k=type=='now'?'n':'l';const t={type,name:$(k+'Name').value,phone:$(k+'Phone').value,pick:$(k+'Pick').value,drop:$(k+'Drop').value,miles:$(k+'Miles').value,pay:$(k+'Pay').value,conf:$(k+'Conf').value,sms:$(k+'Sms').checked,when:type=='later'?$('rDate').value+' '+$('rTime').value:'ASAP',step:0};
- if(!t.name||!t.phone||!t.pick||!t.drop)return toast('Please fill name, phone, pickup and drop-off');
- if(type=='later'&&(!$('rDate').value||!$('rTime').value))return toast('Pick a date and time');
- localStorage.citTrip=JSON.stringify(t);toast('DEMO: a '+(t.conf=='Text'?'text':'call')+' confirmation would go to '+t.phone+' — nothing was sent.');go('status');render()}
-const STEPS=['Request received','Driver assigned','~5 min away — live map unlocks (demo)','Driver is here'];
-function render(){const t=localStorage.citTrip&&JSON.parse(localStorage.citTrip);if(!t)return;
- $('stCard').innerHTML=`<h3>${t.type=='later'?'Reservation':'Ride'} — ${t.when}</h3><p>${t.pick} → ${t.drop}<br>Est. <b>$${fare(t.miles).toFixed(2)}</b> (final fare by the meter) · ${t.pay} · confirm by ${t.conf}</p>
- <ol class="steps">${STEPS.map((s,i)=>`<li class="${i<=t.step?'done':''}">${s}</li>`).join('')}</ol>
- ${t.step==2?'<p class="small">In the real app, the driver map unlocks ~5 minutes before pickup.</p>':''}
- <button class="btn alt" onclick="adv()">${t.step<3?'Simulate next step':'Finish demo trip'}</button><p class="small">Questions? Call (508) 555-0199 (placeholder — number TBD).</p>`}
-function adv(){const t=JSON.parse(localStorage.citTrip);if(t.step>=3){localStorage.removeItem('citTrip');$('stCard').innerHTML='<p>Demo trip finished.</p>';return}t.step++;localStorage.citTrip=JSON.stringify(t);render();toast('DEMO status: '+STEPS[t.step])}
-render();
+const $=id=>document.getElementById(id),S={mode:'now',pay:'Cash',conf:'Text',ride:'std',flags:new Set(),pc:null,dc:null,paid:false,step:0};
+const map=L.map('map',{zoomControl:false}).setView([41.5515,-70.6148],12);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
+let mP,mD,line;
+function drawMap(){[mP,mD,line].forEach(m=>m&&map.removeLayer(m));mP=mD=line=null;
+ if(S.pc)mP=L.circleMarker(S.pc,{radius:9,color:'#22c55e',fillOpacity:1}).addTo(map).bindTooltip('Pickup');
+ if(S.dc)mD=L.circleMarker(S.dc,{radius:9,color:'#f5b301',fillOpacity:1}).addTo(map).bindTooltip('Drop');
+ if(S.pc&&S.dc){line=L.polyline([S.pc,S.dc],{color:'#f5b301',dashArray:'6 6'}).addTo(map);map.fitBounds(line.getBounds(),{padding:[40,40]})}
+ else if(S.pc||S.dc)map.setView(S.pc||S.dc,14)}
+const money=n=>'$'+n.toFixed(2);
+function est(){const m=parseFloat($('mi').value)||0;return 3+3.75*m} // tariff only — never altered by flags/points
+function calc(){const f=money(est());$('fare').textContent=$('fare2').textContent=$('fare3').textContent=f;$('taxBox').classList.toggle('hide',!$('taxT').checked)}
+function hav(a,b){const R=3958.8,r=x=>x*Math.PI/180,dl=r(b[0]-a[0]),dn=r(b[1]-a[1]),h=Math.sin(dl/2)**2+Math.cos(r(a[0]))*Math.cos(r(b[0]))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
+function auto(){drawMap();if(S.pc&&S.dc){$('mi').value=(hav(S.pc,S.dc)*1.25).toFixed(1);calc()}}
+async function rev(c){try{const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${c[0]}&lon=${c[1]}`);const j=await r.json();return j.display_name.split(',').slice(0,3).join(',')}catch(e){return c.map(x=>x.toFixed(5)).join(', ')}}
+function geo(cb){if(!navigator.geolocation)return toast('GPS not available');toast('Getting location…');navigator.geolocation.getCurrentPosition(p=>cb([p.coords.latitude,p.coords.longitude]),()=>toast('Location blocked — type address'),{enableHighAccuracy:true,timeout:10000})}
+function gpsPick(){geo(async c=>{S.pc=c;$('pick').value=await rev(c);auto()})}
+function gpsDrop(){geo(async c=>{S.dc=c;$('drop').value=await rev(c);auto()})}
+async function look(q){const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&viewbox=-70.75,41.65,-70.45,41.50&q='+encodeURIComponent(q+', Falmouth MA'));const j=await r.json();return j[0]?[+j[0].lat,+j[0].lon]:null}
+async function findDrop(){const q=$('drop').value.trim();if(!q)return toast('Type a destination');try{const c=await look(q);if(!c)return toast('Not found — enter miles manually');S.dc=c;
+ if(!S.pc&&$('pick').value.trim()){S.pc=await look($('pick').value.trim())}auto();toast('Destination found')}catch(e){toast('Lookup failed — enter miles')}}
+$('pick').addEventListener('change',()=>{S.pc=null});
+function setMode(m){S.mode=m;$('mNow').classList.toggle('on',m=='now');$('mLater').classList.toggle('on',m=='later');$('laterBox').classList.toggle('hide',m=='now')}
+function setPay(p){S.pay=p;$('pCash').classList.toggle('on',p=='Cash');$('pCard').classList.toggle('on',p=='Card');$('sqBox').classList.toggle('hide',p!='Card');if(p=='Card')initSq()}
+function setConf(c){S.conf=c;$('cText').classList.toggle('on',c=='Text');$('cCall').classList.toggle('on',c=='Call')}
+function flag(k,on){on?S.flags.add(k):S.flags.delete(k);document.querySelectorAll('#disc .chip').forEach(b=>b.classList.toggle('on',S.flags.has(b.dataset.k)))}
+document.querySelectorAll('#disc .chip').forEach(b=>b.onclick=()=>{flag(b.dataset.k,!S.flags.has(b.dataset.k));if(b.dataset.k.startsWith('Wheel'))pickRide(S.flags.has(b.dataset.k)?'wav':'std',1)});
+function pickRide(r,noflag){S.ride=r;$('rStd').classList.toggle('on',r=='std');$('rWav').classList.toggle('on',r=='wav');if(!noflag)flag('Wheelchair accessible needed',r=='wav')}
+document.querySelectorAll('.ride').forEach(e=>e.onkeydown=k=>{if(k.key=='Enter')e.click()});
+// Square
+let sqCard=null,sqTried=false;
+async function initSq(){const id=window.SQUARE_APP_ID,loc=window.SQUARE_LOCATION_ID;if(!id||!loc||sqTried)return;sqTried=true;
+ const s=document.createElement('script');s.src=window.SQUARE_ENV=='production'?'https://web.squarecdn.com/v1/square.js':'https://sandbox.web.squarecdn.com/v1/square.js';
+ s.onload=async()=>{try{const p=window.Square.payments(id,loc);sqCard=await p.card();await sqCard.attach('#card-container');$('sqLive').classList.remove('hide');$('sqDemo').classList.add('hide')}catch(e){toast('Square init failed — demo mode')}};document.head.appendChild(s)}
+async function sqPay(){if(!sqCard)return;const r=await sqCard.tokenize();if(r.status=='OK'){S.token=r.token;S.paid='authorized';toast('Card authorized — charge happens on server')}else toast('Card error')}
+function simPaid(){S.paid=true;$('paidTag').textContent='✓ Demo paid';toast('Demo: card marked paid')}
+// points
+const P=()=>+localStorage.cit_points||0;function showPts(){$('pts').textContent=P()}showPts();
+$('ptsBtn').onclick=()=>toast(`You have ${P()} pts. Points redeem coming soon — not applied to fare.`);
+function toast(t){const e=$('toast');e.textContent=t;e.style.opacity=1;clearTimeout(e._t);e._t=setTimeout(()=>e.style.opacity=0,2800)}
+// booking
+let T=null;const D=[['Mike R.','White Toyota Camry · CIT-1'],['Dana S.','Black Ford Escape · CIT-2']];
+function book(){if(!$('pick').value.trim()||!$('drop').value.trim())return toast('Add pickup and destination');if(!$('phone').value.trim())return toast('Add your mobile number');
+ if(S.mode=='later'&&!$('when').value)return toast('Pick a reservation time');
+ T={id:'CIT-'+Date.now().toString().slice(-5),pick:$('pick').value,drop:$('drop').value,mi:parseFloat($('mi').value)||0,est:est(),pay:S.pay,paid:S.paid,conf:S.conf,sms:$('sms').checked,flags:[...S.flags],when:S.mode=='later'?$('when').value:'ASAP',name:$('name').value,phone:$('phone').value};
+ localStorage.cit_lastTrip=JSON.stringify(T);S.step=0;$('vBook').classList.add('hide');$('vTrip').classList.remove('hide');window.scrollTo(0,0);render();toast('Demo request saved — no real ride booked')}
+function render(){const st=S.step,li=$('steps').children;[...li].forEach((l,i)=>l.classList.toggle('done',i<=st));
+ $('tTitle').textContent=li[Math.min(st,4)].textContent;$('eta').textContent=['ETA —','~12 min','~5 min','Here','Done'][st];
+ $('dName').textContent=st>0?D[0][0]:'Finding your driver…';$('dCar').textContent=st>0?D[0][1]:'';
+ $('lock').classList.toggle('hide',!(st<2));
+ $('tSum').innerHTML=`<div class="row"><span>Trip</span><span>${T.id}</span></div><div class="row"><span>When</span><span>${T.when=='ASAP'?'Now':T.when.replace('T',' ')}</span></div><div class="row"><span>Estimate</span><b>${money(T.est)}</b></div><div class="row"><span>Payment</span><span>${T.pay}${T.pay=='Card'?(T.paid?' · paid (demo)':' · pay at pickup'):''}</span></div><div class="row"><span>Confirm by</span><span>${T.conf}${T.sms?' · SMS on':''}</span></div>${T.flags.length?`<div class="row"><span>Flags</span><span style="text-align:right">${T.flags.join(', ')}</span></div><p class="note">Discount eligibility is flagged for dispatch; estimate stays at the Town tariff.</p>`:''}<p class="note">Estimate only — final fare by meter.</p>`;
+ $('advBtn').classList.toggle('hide',st>=4)}
+function adv(){if(S.step>=4)return;S.step++;if(S.step==4){const n=Math.round(T.est);localStorage.cit_points=P()+n;showPts();toast(`Trip complete — +${n} points (demo)`)}render()}
+function reset(){$('vTrip').classList.add('hide');$('vBook').classList.remove('hide');$('lock').classList.add('hide')}
+calc();
 </script></body></html>
